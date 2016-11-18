@@ -216,7 +216,9 @@ class Router:
         print('%s: routing table' % self)
         #TODO: print the routes as a two dimensional table for easy inspection
         # Currently the function just prints the route table as a dictionary
-        print(self.rt_tbl_D)
+        print('\n'.join([''.join(['{:2}'.format(item) for item in row])
+                         for row in self.rt_tbl_D]))
+        #print(self.rt_tbl_D)
 
 
     ## thread target for the host to keep forwarding data
