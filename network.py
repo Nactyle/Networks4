@@ -15,7 +15,7 @@ class Interface:
         self.in_queue = queue.Queue(maxsize);
         self.out_queue = queue.Queue(maxsize);
         self.cost = cost
-
+    
     ##get packet from the queue interface
     # @param in_or_out - use 'in' or 'out' interface
     def get(self, in_or_out):
@@ -32,7 +32,7 @@ class Interface:
                 return pkt_S
         except queue.Empty:
             return None
-
+        
     ##put the packet into the interface queue
     # @param pkt - Packet to be inserted into the queue
     # @param in_or_out - use 'in' or 'out' interface
@@ -44,17 +44,17 @@ class Interface:
         else:
 #             print('putting packet in the IN queue')
             self.in_queue.put(pkt, block)
-
-
-## Implements a network layer packet (different from the RDT packet
+            
+        
+## Implements a network layer packet (different from the RDT packet 
 # from programming assignment 2).
 # NOTE: This class will need to be extended to for the packet to include
 # the fields necessary for the completion of this assignment.
 class NetworkPacket:
-    ## packet encoding lengths
+    ## packet encoding lengths 
     dst_addr_S_length = 5
     prot_S_length = 1
-
+    
     ##@param dst_addr: address of the destination host
     # @param data_S: packet payload
     # @param prot_S: upper layer protocol for the packet (data, or control)
@@ -62,11 +62,11 @@ class NetworkPacket:
         self.dst_addr = dst_addr
         self.data_S = data_S
         self.prot_S = prot_S
-
+        
     ## called when printing the object
     def __str__(self):
         return self.to_byte_S()
-
+        
     ## convert packet to a byte string for transmission over links
     def to_byte_S(self):
         byte_S = str(self.dst_addr).zfill(self.dst_addr_S_length)
@@ -78,7 +78,7 @@ class NetworkPacket:
             raise('%s: unknown prot_S option: %s' %(self, self.prot_S))
         byte_S += self.data_S
         return byte_S
-
+    
     ## extract a packet object from a byte string
     # @param byte_S: byte string representation of the packet
     @classmethod
@@ -91,25 +91,25 @@ class NetworkPacket:
             prot_S = 'control'
         else:
             raise('%s: unknown prot_S field: %s' %(self, prot_S))
-        data_S = byte_S[NetworkPacket.dst_addr_S_length + NetworkPacket.prot_S_length : ]
+        data_S = byte_S[NetworkPacket.dst_addr_S_length + NetworkPacket.prot_S_length : ]        
         return self(dst_addr, prot_S, data_S)
+    
 
-
-
+    
 
 ## Implements a network host for receiving and transmitting data
 class Host:
-
+    
     ##@param addr: address of this node represented as an integer
     def __init__(self, addr):
         self.addr = addr
         self.intf_L = [Interface()]
         self.stop = False #for thread termination
-
+    
     ## called when printing the object
     def __str__(self):
         return 'Host_%s' % (self.addr)
-
+       
     ## create a packet and enqueue for transmission
     # @param dst_addr: destination address for the packet
     # @param data_S: data being transmitted to the network layer
@@ -117,13 +117,13 @@ class Host:
         p = NetworkPacket(dst_addr, 'data', data_S)
         print('%s: sending packet "%s"' % (self, p))
         self.intf_L[0].put(p.to_byte_S(), 'out') #send packets always enqueued successfully
-
+        
     ## receive packet from the network layer
     def udt_receive(self):
         pkt_S = self.intf_L[0].get('in')
         if pkt_S is not None:
             print('%s: received packet "%s"' % (self, pkt_S))
-
+       
     ## thread target for the host to keep receiving data
     def run(self):
         print (threading.currentThread().getName() + ': Starting')
@@ -134,14 +134,14 @@ class Host:
             if(self.stop):
                 print (threading.currentThread().getName() + ': Ending')
                 return
-
+        
 
 
 ## Implements a multi-interface router described in class
 class Router:
-
+    
     ##@param name: friendly router name for debugging
-    # @param intf_cost_L: outgoing cost of interfaces (and interface number)
+    # @param intf_cost_L: outgoing cost of interfaces (and interface number) 
     # @param rt_tbl_D: routing table dictionary (starting reachability), eg. {1: {1: 1}} # packet to host 1 through interface 1 for cost 1
     # @param max_queue_size: max queue length (passed to Interface)
     def __init__(self, name, intf_cost_L, rt_tbl_D, max_queue_size):
@@ -153,13 +153,13 @@ class Router:
         for cost in intf_cost_L:
             self.intf_L.append(Interface(cost, max_queue_size))
         #set up the routing table for connected hosts
-        self.rt_tbl_D = rt_tbl_D
+        self.rt_tbl_D = rt_tbl_D 
 
     ## called when printing the object
     def __str__(self):
         return 'Router_%s' % (self.name)
 
-    ## look through the content of incoming interfaces and
+    ## look through the content of incoming interfaces and 
     # process data and control packets
     def process_queues(self):
         for i in range(len(self.intf_L)):
@@ -175,13 +175,13 @@ class Router:
                     self.update_routes(p, i)
                 else:
                     raise Exception('%s: Unknown packet type in packet %s' % (self, p))
-
+            
     ## forward the packet according to the routing table
     #  @param p Packet to forward
     #  @param i Incoming interface number for packet p
     def forward_packet(self, p, i):
         try:
-            # TODO: Here you will need to implement a lookup into the
+            # TODO: Here you will need to implement a lookup into the 
             # forwarding table to find the appropriate outgoing interface
             # for now we assume the outgoing interface is (i+1)%2
             self.intf_L[(i+1)%2].put(p.to_byte_S(), 'out', True)
@@ -189,14 +189,14 @@ class Router:
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
             pass
-
+        
     ## forward the packet according to the routing table
     #  @param p Packet containing routing information
     def update_routes(self, p, i):
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
         print('%s: Received routing update %s from interface %d' % (self, p, i))
-
+        
     ## send out route update
     # @param i Interface number on which to send out a routing update
     def send_routes(self, i):
@@ -209,18 +209,23 @@ class Router:
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
             pass
-
-
+        
     ## Print routing table
     def print_routes(self):
         print('%s: routing table' % self)
         #TODO: print the routes as a two dimensional table for easy inspection
         # Currently the function just prints the route table as a dictionary
-        print('\n'.join([''.join(['{:2}'.format(item) for item in row])
-                         for row in self.rt_tbl_D]))
+        for key in self.rt_tbl_D:
+            print('\t' + str(key), end='')
+
+        print()
+        for key in self.rt_tbl_D:
+            for sub_key in self.rt_tbl_D[key]:
+                print(str(sub_key) + '\t', end='')
+                print(self.rt_tbl_D[key][sub_key])
         #print(self.rt_tbl_D)
-
-
+        
+                
     ## thread target for the host to keep forwarding data
     def run(self):
         print (threading.currentThread().getName() + ': Starting')
@@ -228,4 +233,4 @@ class Router:
             self.process_queues()
             if self.stop:
                 print (threading.currentThread().getName() + ': Ending')
-                return
+                return 
