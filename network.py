@@ -136,6 +136,34 @@ class Host:
                 return
         
 
+class Message:
+    dst_addr_S_length = 5
+    cost_S_length = 1
+
+    ##@param dst_addr: address of the destination host
+    # @param data_S: packet payload
+    # @param prot_S: upper layer protocol for the packet (data, or control)
+    def __init__(self, dst_addr, cost_S):
+        self.dst_addr = dst_addr
+        self.cost_S = cost_S
+
+    ## called when printing the object
+    def __str__(self):
+        return self.to_byte_S()
+
+    ## convert packet to a byte string for transmission over links
+    def to_byte_S(self):
+        byte_S = str(self.dst_addr).zfill(self.dst_addr_S_length)
+        byte_S += str(self.cost_S)
+        return byte_S
+
+    ## extract a packet object from a byte string
+    # @param byte_S: byte string representation of the packet
+    @classmethod
+    def from_byte_S(self, byte_S):
+        dst_addr = int(byte_S[0: Message.dst_addr_S_length])
+        cost_S = int[Message.dst_addr_S_length + Message.cost_S_length:]
+        return self(dst_addr, cost_S)
 
 ## Implements a multi-interface router described in class
 class Router:
