@@ -162,7 +162,7 @@ class Message:
     @classmethod
     def from_byte_S(self, byte_S):
         dst_addr = int(byte_S[0: Message.dst_addr_S_length])
-        cost_S = int[Message.dst_addr_S_length + Message.cost_S_length:]
+        cost_S = int(byte_S[Message.dst_addr_S_length:])
         return self(dst_addr, cost_S)
 
 ## Implements a multi-interface router described in class
@@ -226,7 +226,8 @@ class Router:
         inter = 0
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
-        n = p[p.dst_addr_S_length+p.prot_S_length:]
+        nString = p.to_byte_S()
+        n = nString[p.dst_addr_S_length+p.prot_S_length:]
         m = Message.from_byte_S(n)
         for key in self.rt_tbl_D:
             if key == m.dst_addr:
@@ -236,17 +237,17 @@ class Router:
                         foundI = 1
                         if m.cost_S + self.intf_L[i].cost < self.rt_tbl_D[key][subkey]:
                             self.rt_tbl_D[key][subkey] = m.cost_S + self.intf_L[i].cost
-                            for x in self.intf_L:
+                            for  x in range(len(self.intf_L)):
                                 if x != i:
                                     self.send_routes(x,m.dst_addr,self.rt_tbl_D[key][subkey])
                 if foundI == 0:
                     self.rt_tbl_D[key].update({i:(m.cost_S + self.intf_L[i].cost)})
-                    for x in self.intf_L:
+                    for x in range(len(self.intf_L)):
                         if x != i:
                             self.send_routes(x, key, self.rt_tbl_D[key][i])
         if foundD == 0:
             self.rt_tbl_D.update({m.dst_addr: {i:(m.cost_S + self.intf_L[i].cost)}})
-            for x in self.intf_L:
+            for x in range(len(self.intf_L)):
                 if x != i:
                     self.send_routes(x, m.dst_addr, self.rt_tbl_D[m.dst_addr][i])
 
