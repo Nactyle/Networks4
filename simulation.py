@@ -57,11 +57,11 @@ if __name__ == '__main__':
     #send out routing information from router A to router B interface 0
     router_a.send_routes(1,1,1)
     router_b.send_routes(0,2,3)
+    sleep(simulation_time)
     
     #create some send events    
     for i in range(1):
         client.udt_send(2, 'Sample client data %d' % i)
-        server.udt_send(1, 'Sample client data %d' % i)
         
     #give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)

@@ -123,6 +123,8 @@ class Host:
         pkt_S = self.intf_L[0].get('in')
         if pkt_S is not None:
             print('%s: received packet "%s"' % (self, pkt_S))
+            if self.addr is 2:
+                self.udt_send(1, 'Sample Server reply')
        
     ## thread target for the host to keep receiving data
     def run(self):
