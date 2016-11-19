@@ -221,8 +221,35 @@ class Router:
     ## forward the packet according to the routing table
     #  @param p Packet containing routing information
     def update_routes(self, p, i):
+        foundD = 0
+        foundI = 0
+        inter = 0
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
+        n = p[p.dst_addr_S_length+p.prot_S_length:]
+        m = Message.from_byte_S(n)
+        for key in self.rt_tbl_D:
+            if key == m.dst_addr:
+                foundD = 1
+                for subkey in self.rt_tbl_D[key]:
+                    if subkey == i:
+                        foundI = 1
+                        if m.cost_S + self.intf_L[i].cost < self.rt_tbl_D[key][subkey]:
+                            self.rt_tbl_D[key][subkey] = m.cost_S + self.intf_L[i].cost
+                            for x in self.intf_L:
+                                if x != i:
+                                    self.send_routes(x,m.dst_addr,self.rt_tbl_D[key][subkey])
+                if foundI == 0:
+                    self.rt_tbl_D[key].update({i:(m.cost_S + self.intf_L[i].cost)})
+                    for x in self.intf_L:
+                        if x != i:
+                            self.send_routes(x, key, self.rt_tbl_D[key][i])
+        if foundD == 0:
+            self.rt_tbl_D.update({m.dst_addr: {i:(m.cost_S + self.intf_L[i].cost)}})
+            for x in self.intf_L:
+                if x != i:
+                    self.send_routes(x, m.dst_addr, self.rt_tbl_D[m.dst_addr][i])
+
         print('%s: Received routing update %s from interface %d' % (self, p, i))
         
     ## send out route update
@@ -230,7 +257,8 @@ class Router:
     def send_routes(self, i, d, c):
         # a sample route update packet
         m = Message(d,c)
-        p = NetworkPacket(0, 'control', m)
+        mString = m.to_byte_S()
+        p = NetworkPacket(0, 'control', mString)
         try:
             #TODO: add logic to send out a route update
             print('%s: sending routing update "%s" from interface %d' % (self, p, i))
