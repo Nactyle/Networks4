@@ -61,6 +61,7 @@ if __name__ == '__main__':
     #create some send events    
     for i in range(1):
         client.udt_send(2, 'Sample client data %d' % i)
+        server.udt_send(1, 'Sample client data %d' % i)
         
     #give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)
