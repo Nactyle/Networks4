@@ -209,10 +209,19 @@ class Router:
     #  @param i Incoming interface number for packet p
     def forward_packet(self, p, i):
         try:
+            cost = 100;
+            edoor = 10;
             # TODO: Here you will need to implement a lookup into the 
             # forwarding table to find the appropriate outgoing interface
             # for now we assume the outgoing interface is (i+1)%2
-            self.intf_L[(i+1)%2].put(p.to_byte_S(), 'out', True)
+            for key in self.rt_tbl_D:
+                if key == p.dst_addr:
+                    for subkey in self.rt_tbl_D[key]:
+                        if self.rt_tbl_D[key][subkey] < cost:
+                            cost = self.rt_tbl_D[key][subkey];
+                            edoor = subkey;
+            self.intf_L[edoor].put(p.to_byte_S(), 'out', True)
+            #self.intf_L[(i + 1) % 2].put(p.to_byte_S(), 'out', True)
             print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, (i+1)%2))
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
