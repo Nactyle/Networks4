@@ -224,7 +224,7 @@ class Router:
                             edoor = subkey;
             self.intf_L[edoor].put(p.to_byte_S(), 'out', True)
             # self.intf_L[(i + 1) % 2].put(p.to_byte_S(), 'out', True)
-            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, (i + 1) % 2))
+            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, edoor))
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
             pass
@@ -281,7 +281,6 @@ class Router:
 
     ## Print routing table
     def print_routes(self):
-        print('%s: routing table' % self)
         # TODO: print the routes as a two dimensional table for easy inspection
         # Currently the function just prints the route table as a dictionary
         print(self.rt_tbl_D)

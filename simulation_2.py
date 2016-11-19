@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     # print the final routing tables
     for obj in object_L:
-        if str(type(obj)) == "<class 'network.Router'>":
+        if str(type(obj)) == "<class 'network_2.Router'>":
             obj.print_routes()
 
     # join all threads

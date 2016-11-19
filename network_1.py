@@ -225,7 +225,7 @@ class Router:
                             edoor = subkey;
             self.intf_L[edoor].put(p.to_byte_S(), 'out', True)
             #self.intf_L[(i + 1) % 2].put(p.to_byte_S(), 'out', True)
-            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, (i+1)%2))
+            print('%s: forwarding packet "%s" from interface %d to %d' % (self, p, i, edoor))
         except queue.Full:
             print('%s: packet "%s" lost on interface %d' % (self, p, i))
             pass
@@ -282,10 +282,40 @@ class Router:
         
     ## Print routing table
     def print_routes(self):
-        print('%s: routing table' % self)
         #TODO: print the routes as a two dimensional table for easy inspection
         # Currently the function just prints the route table as a dictionary
-        print(self.rt_tbl_D)
+        rows = [[] for j in range(len(self.intf_L))]
+        buffer = 0
+        for keys in self.rt_tbl_D:
+            for sub_keys in self.rt_tbl_D[keys]:
+                rows[sub_keys].append(self.rt_tbl_D[keys][sub_keys])
+            buffer += 1
+        print('%s: routing table' % self)
+        print('{:>16}'.format("Cost To:"))
+        # Print all destinations in a row
+        print('{:>8}'.format(""), end="")
+        count = -1
+        for destination in self.rt_tbl_D:
+            print(destination, end=" ")
+            count += 1
+        print()
+        print("From:", end=" ")
+        for n in range(len(rows)):
+            print(n, end=" ")
+            k = 0
+            while k < n:
+                if k < count:
+                    print("-", end=" ")
+                k += 1
+            for m in range(len(rows[n])):
+                print(rows[n][m], end=" ")
+                k += 1
+            while k <= count:
+                print("-", end=" ")
+                k += 1
+            print()
+            print('{:>6}'.format(""), end="")
+        #print(self.rt_tbl_D)
         
                 
     ## thread target for the host to keep forwarding data
