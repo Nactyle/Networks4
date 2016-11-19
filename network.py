@@ -227,9 +227,10 @@ class Router:
         
     ## send out route update
     # @param i Interface number on which to send out a routing update
-    def send_routes(self, i):
+    def send_routes(self, i, d, c):
         # a sample route update packet
-        p = NetworkPacket(0, 'control', 'Sample routing table packet')
+        m = Message(d,c)
+        p = NetworkPacket(0, 'control', m)
         try:
             #TODO: add logic to send out a route update
             print('%s: sending routing update "%s" from interface %d' % (self, p, i))
@@ -243,15 +244,7 @@ class Router:
         print('%s: routing table' % self)
         #TODO: print the routes as a two dimensional table for easy inspection
         # Currently the function just prints the route table as a dictionary
-        for key in self.rt_tbl_D:
-            print('\t' + str(key), end='')
-
-        print()
-        for key in self.rt_tbl_D:
-            for sub_key in self.rt_tbl_D[key]:
-                print(str(sub_key) + '\t', end='')
-                print(self.rt_tbl_D[key][sub_key])
-        #print(self.rt_tbl_D)
+        print(self.rt_tbl_D)
         
                 
     ## thread target for the host to keep forwarding data

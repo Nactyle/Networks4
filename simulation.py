@@ -55,7 +55,8 @@ if __name__ == '__main__':
         t.start()
     
     #send out routing information from router A to router B interface 0
-    router_a.send_routes(1)
+    router_a.send_routes(1,1,1)
+    router_b.send_routes(0,2,3)
     
     #create some send events    
     for i in range(1):
